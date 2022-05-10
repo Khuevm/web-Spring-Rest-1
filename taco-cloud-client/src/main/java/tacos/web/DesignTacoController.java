@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +21,6 @@ import tacos.Taco;
 @RequestMapping("/design")
 public class DesignTacoController {
 	private RestTemplate rest = new RestTemplate();
-	// rest.postForObject("http://localhost:8080/ingredients", ingredients,
-	// Ingredient.class);
 
 	@ModelAttribute
 	public void addIngredientsToModel(Model model) {
@@ -36,16 +35,26 @@ public class DesignTacoController {
 		}
 	}
 
-	private Object filterByType(List<Ingredient> ingredients, Type type) {
-		// TODO Auto-generated method stub
-		return rest.postForObject("http://localhost:8080/ingredients/CARN", ingredients, Ingredient.class);
+	@GetMapping
+	public String showDesignForm(Model model) {
+		model.addAttribute("taco", new Taco());
+		return "design";
+	}
+
+	private List<Ingredient> filterByType(List<Ingredient> ingredients, Type type) {
+		List<Ingredient> ingrList = new ArrayList<Ingredient>();
+		for (Ingredient ingredient : ingredients) {
+			if (ingredient.getType().equals(type))
+				ingrList.add(ingredient);
+		}
+		return ingrList;
 	}
 
 	@PostMapping
 	public String processDesign(@RequestParam("ingredients") String ingredientIds, @RequestParam("name") String name) {
 		List<Ingredient> ingredients = new ArrayList<Ingredient>();
 		for (String ingredientId : ingredientIds.split(",")) {
-			Ingredient ingredient = rest.getForObject("http://localhost:8080/ ingredients/{id}", Ingredient.class,
+			Ingredient ingredient = rest.getForObject("http://localhost:8080/ingredients/{id}", Ingredient.class,
 					ingredientId);
 			ingredients.add(ingredient);
 		}
